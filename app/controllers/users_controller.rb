@@ -21,7 +21,8 @@ class UsersController < ApplicationController
     @user = User.find_by(email: params[:email])
 
     if @user && @user.authenticate(params[:password])
-      token = encode_token({user_id: @user.id})
+      expires_at = Time.now.to_i + 4 * 3600
+      token = encode_token({ user_id: @user.id, first_name: @user.first_name, email: @user.email, expires_at: expires_at })
       decoded_token = JWT.decode(token, 's3cr3t', true, algorithm: 'HS256')
       render json: {user: @user, token: token, expires_at: decoded_token[0]['expires_at']}
     else
