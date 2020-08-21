@@ -3,8 +3,7 @@ class TasksController < ApplicationController
 
   # GET /tasks
   def index
-    @tasks = Task.all
-
+    @tasks = Task.all.order(:id)
     render json: @tasks
   end
 
@@ -15,7 +14,9 @@ class TasksController < ApplicationController
 
   # POST /tasks
   def create
-    @task = Task.new(task_params)
+    task_data = task_params
+    task_data[:user_id] = logged_in_user.id
+    @task = Task.new(task_data)
 
     if @task.save
       render json: @task, status: :created, location: @task
@@ -39,13 +40,13 @@ class TasksController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_task
-      @task = Task.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_task
+    @task = Task.find(params[:id])
+  end
 
-    # Only allow a trusted parameter "white list" through.
-    def task_params
-      params.require(:task).permit(:name, :deadline, :description, :is_completed)
-    end
+  # Only allow a trusted parameter "white list" through.
+  def task_params
+    params.require(:task).permit(:name, :deadline, :description, :is_completed)
+  end
 end
