@@ -3,7 +3,7 @@ class TasksController < ApplicationController
 
   # GET /tasks
   def index
-    @tasks = Task.all.order(:id)
+    @tasks = Task.where('deadline LIKE (?)', params[:date] + "%").order(:id)
     render json: @tasks
   end
 
