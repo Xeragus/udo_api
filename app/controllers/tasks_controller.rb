@@ -19,10 +19,27 @@ class TasksController < ApplicationController
     render json: @task
   end
 
+  def group_by_criteria
+    deadline.to_date.to_s(:db)
+  end
+
+  def task_completion_data
+    @data = []
+    tasks = Task.where('deadline >= ?', params[:number_of_days].to_i.days.ago.to_datetime.beginning_of_day)
+                .where('deadline <= ?', 0.days.ago.to_datetime.end_of_day)
+    grouped_tasks_by_day = tasks.group_by(&:deadline).map { |k, v| [k, v] }.sort
+    grouped_tasks_by_day.each do |tasks_data|
+      completion_percentage = tasks_data[1].select { |task| task[:is_completed] == true }.count * 100.00 / tasks_data[1].count
+      @data.push({ date: tasks_data[0], completion_percentage: completion_percentage })
+    end
+    render json: @data
+  end
+
   # POST /tasks
   def create
     task_data = task_params
     task_data[:user_id] = logged_in_user.id
+    task_data[:deadline] = Date.parse(params[:deadline]).end_of_day
     @task = Task.new(task_data)
 
     if @task.save

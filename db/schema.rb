@@ -10,7 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_19_194542) do
+ActiveRecord::Schema.define(version: 2020_09_08_165539) do
+
+  create_table "goals", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "measured_in", null: false
+    t.float "start_from", null: false
+    t.float "current_progress", default: 0.0, null: false
+    t.float "target", null: false
+    t.string "deadline", null: false
+    t.boolean "is_completed", default: false, null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "fk_rails_c5fd9c8a38"
+  end
 
   create_table "tasks", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
@@ -35,5 +49,6 @@ ActiveRecord::Schema.define(version: 2020_08_19_194542) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "goals", "users"
   add_foreign_key "tasks", "users"
 end
