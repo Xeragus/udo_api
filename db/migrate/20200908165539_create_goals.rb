@@ -7,7 +7,7 @@ class CreateGoals < ActiveRecord::Migration[6.0]
       t.float :current_progress, null: false, default: 0
       t.float :target, null: false
       t.string :deadline, null: false
-      t.boolean :is_completed, default: false, null: false
+      t.string :status, default: 'active', null: false
       t.bigint :user_id, null: false
       t.timestamps
     end

@@ -19,7 +19,7 @@ ActiveRecord::Schema.define(version: 2020_09_08_165539) do
     t.float "current_progress", default: 0.0, null: false
     t.float "target", null: false
     t.string "deadline", null: false
-    t.boolean "is_completed", default: false, null: false
+    t.string "status", default: "active", null: false
     t.bigint "user_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false

@@ -5,7 +5,7 @@ class GoalsController < ApplicationController
   def index
     @goals = Goal.all
 
-    render json: @goals
+    render json: { goals: @goals }
   end
 
   # GET /goals/1

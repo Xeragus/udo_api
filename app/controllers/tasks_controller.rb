@@ -30,7 +30,7 @@ class TasksController < ApplicationController
     grouped_tasks_by_day = tasks.group_by(&:deadline).map { |k, v| [k, v] }.sort
     grouped_tasks_by_day.each do |tasks_data|
       completion_percentage = tasks_data[1].select { |task| task[:is_completed] == true }.count * 100.00 / tasks_data[1].count
-      @data.push({ date: tasks_data[0], completion_percentage: completion_percentage })
+      @data.push({ date: tasks_data[0], completion_percentage: completion_percentage.round(0) })
     end
     render json: @data
   end
