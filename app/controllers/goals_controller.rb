@@ -3,7 +3,7 @@ class GoalsController < ApplicationController
 
   # GET /goals
   def index
-    @goals = Goal.all
+    @goals = Goal.where(status: params[:status])
 
     render json: { goals: @goals }
   end
@@ -50,6 +50,6 @@ class GoalsController < ApplicationController
   # Only allow a trusted parameter "white list" through.
   def goal_params
     params.require(:goal).permit(:name, :measured_in, :start_from, :current_progress,
-                                 :target, :deadline, :is_completed)
+                                 :target, :deadline, :is_completed, :status)
   end
 end
