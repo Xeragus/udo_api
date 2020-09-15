@@ -3,6 +3,8 @@ class GoalsController < ApplicationController
 
   # GET /goals
   def index
+    process_existing_goals
+
     @goals = Goal.where(status: params[:status])
 
     render json: { goals: @goals }
@@ -17,6 +19,7 @@ class GoalsController < ApplicationController
   def create
     goal_data = goal_params
     goal_data[:user_id] = logged_in_user.id
+    goal_data[:deadline] = Time.parse(goal_data[:deadline])
     @goal = Goal.new(goal_data)
 
     if @goal.save
@@ -59,5 +62,10 @@ class GoalsController < ApplicationController
   def goal_params
     params.require(:goal).permit(:name, :measured_in, :start_from, :current_progress,
                                  :target, :deadline, :is_completed, :status)
+  end
+
+  def process_existing_goals
+    Goal.where('deadline < ?', Time.now.to_formatted_s)
+        .where(status: 'active').update(status: 'overdue')
   end
 end
