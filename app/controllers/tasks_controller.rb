@@ -3,14 +3,14 @@ class TasksController < ApplicationController
 
   # GET /tasks
   def index
-    @tasks = Task.where('deadline LIKE (?)', params[:date] + '%').where(user_id: logged_in_user.id).order(:id)
+    @tasks = Task.where('deadline LIKE (?)', params[:date] + '%').where(user_id: logged_in_user.id)
 
     @completion_percentage = nil
     if @tasks.count > 0
       @completion_percentage = @tasks.where('is_completed', true).count * 100.00 / @tasks.count
       @completion_percentage = @completion_percentage.round(0)
-    end 
-    
+    end
+
     render json: { tasks: @tasks, completion_percentage: @completion_percentage }
   end
 

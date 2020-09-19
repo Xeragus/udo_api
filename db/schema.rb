@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_08_165539) do
+ActiveRecord::Schema.define(version: 2020_09_19_153107) do
 
   create_table "goals", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
@@ -26,6 +26,13 @@ ActiveRecord::Schema.define(version: 2020_09_08_165539) do
     t.index ["user_id"], name: "fk_rails_c5fd9c8a38"
   end
 
+  create_table "tags", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "code", null: false
+    t.bigint "user_id"
+    t.index ["user_id"], name: "fk_rails_e689f6d0cc"
+  end
+
   create_table "tasks", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "description"
@@ -35,6 +42,13 @@ ActiveRecord::Schema.define(version: 2020_09_08_165539) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["user_id"], name: "fk_rails_4d2a9e4d7e"
+  end
+
+  create_table "tasks_tags", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "task_id"
+    t.bigint "tag_id"
+    t.index ["tag_id"], name: "index_tasks_tags_on_tag_id"
+    t.index ["task_id"], name: "index_tasks_tags_on_task_id"
   end
 
   create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -50,5 +64,8 @@ ActiveRecord::Schema.define(version: 2020_09_08_165539) do
   end
 
   add_foreign_key "goals", "users"
+  add_foreign_key "tags", "users"
   add_foreign_key "tasks", "users"
+  add_foreign_key "tasks_tags", "tags"
+  add_foreign_key "tasks_tags", "tasks"
 end

@@ -5,7 +5,7 @@ class GoalsController < ApplicationController
   def index
     process_existing_goals
 
-    @goals = Goal.where(status: params[:status])
+    @goals = Goal.where(status: params[:status]).where(user_id: logged_in_user.id)
 
     render json: { goals: @goals }
   end
