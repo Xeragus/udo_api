@@ -11,7 +11,7 @@ class TasksController < ApplicationController
       @completion_percentage = @completion_percentage.round(0)
     end
 
-    render json: { tasks: @tasks, completion_percentage: @completion_percentage }
+    render json: { tasks: @tasks.as_json(include: :tags), completion_percentage: @completion_percentage }
   end
 
   # GET /tasks/1
@@ -43,6 +43,17 @@ class TasksController < ApplicationController
     @task = Task.new(task_data)
 
     if @task.save
+      tags = params.require(:tags)
+
+      tags.each do |tag|
+        if tag[:id].present?
+          TasksTag.create({ task_id: @task.id, tag_id: tag[:id] })
+        else
+          new_tag = Tag.create!({ name: tag[:name].upcase, code: tag[:name].downcase })
+          TasksTag.create({ task_id: @task.id, tag_id: new_tag.id })
+        end
+      end
+
       render json: @task, status: :created, location: @task
     else
       render json: @task.errors, status: :unprocessable_entity
@@ -60,6 +71,7 @@ class TasksController < ApplicationController
 
   # DELETE /tasks/1
   def destroy
+    @task.tags.delete_all
     @task.destroy
   end
 
