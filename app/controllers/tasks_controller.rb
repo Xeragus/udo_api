@@ -46,11 +46,17 @@ class TasksController < ApplicationController
       tags = params.require(:tags)
 
       tags.each do |tag|
+        next unless @task.tags.where(name: tag[:name]).empty?
+
         if tag[:id].present?
-          TasksTag.create({ task_id: @task.id, tag_id: tag[:id] })
+          unless TasksTag.where(tag_id: tag[:id], task_id: @task.id).exists?
+            TasksTag.create({ task_id: @task.id, tag_id: tag[:id] })
+          end
         else
-          new_tag = Tag.create!({ name: tag[:name].upcase, code: tag[:name].downcase })
-          TasksTag.create({ task_id: @task.id, tag_id: new_tag.id })
+          unless @task.tags.where(name: tag[:name].upcase).exists?
+            new_tag = Tag.create!({ name: tag[:name].upcase, code: tag[:name].downcase })
+            TasksTag.create({ task_id: @task.id, tag_id: new_tag.id })
+          end
         end
       end
 
@@ -63,6 +69,19 @@ class TasksController < ApplicationController
   # PATCH/PUT /tasks/1
   def update
     if @task.update(task_params)
+      tags = params.has_key?(:tags) ? params.require(:tags) : []
+
+      tags.each do |tag|
+        next unless @task.tags.where(name: tag[:name]).empty?
+
+        if tag[:id].present?
+          TasksTag.create({ task_id: @task.id, tag_id: tag[:id] })
+        else
+          new_tag = Tag.create!({ name: tag[:name].upcase, code: tag[:name].downcase })
+          TasksTag.create({ task_id: @task.id, tag_id: new_tag.id })
+        end
+      end
+
       render json: @task
     else
       render json: @task.errors, status: :unprocessable_entity

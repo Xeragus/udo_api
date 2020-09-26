@@ -34,6 +34,47 @@ class UsersController < ApplicationController
     render json: @user
   end
 
+  def task_stats_header_data
+    @user = User.find_by(email: params[:email])
+    sql = "SELECT is_completed, tag_id from tasks JOIN users ON users.id = tasks.user_id
+          JOIN tasks_tags ON tasks.id = tasks_tags.task_id WHERE user_id = #{@user.id} ORDER BY tag_id;"
+
+    results = ActiveRecord::Base.connection.exec_query(sql).rows
+    tag_success_data = {}
+    results.each do |result|
+      if tag_success_data.has_key?(result[1])
+        tag_success_data[result[1]] = tag_success_data[result[1]].push(result[0])
+      else
+        tag_success_data[result[1]] = [result[0]]
+      end
+    end
+
+    max_average_percentage = 0
+    min_average_percentage = 100
+    max_tag_id = 0
+    min_tag_id = 0
+
+    tag_success_data.each do |tag_id, data_array|
+      percentage = data_array.sum * 100 / data_array.count
+      if percentage > max_average_percentage
+        max_average_percentage = percentage
+        max_tag_id = tag_id
+      end
+      if percentage < min_average_percentage
+        min_average_percentage = percentage
+        min_tag_id = tag_id
+      end
+    end
+
+    @data = {
+      favorite_tag: @user.tags.group('name').order('count_all desc').limit(1).count,
+      least_favorite_tag: @user.tags.group('name').order('count_all').limit(1).count,
+      most_successfull_tag: max_tag_id.positive? ? { name: Tag.find(max_tag_id).name, percentage: max_average_percentage } : {},
+      toughest_tag: min_tag_id.positive? ? { name: Tag.find(min_tag_id).name, percentage: min_average_percentage } : {}
+    }
+    render json: @data
+  end
+
   private
 
   def user_params

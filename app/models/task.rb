@@ -4,4 +4,5 @@ class Task < ApplicationRecord
 
   has_many :tasks_tags
   has_many :tags, through: :tasks_tags
+  belongs_to :user
 end
