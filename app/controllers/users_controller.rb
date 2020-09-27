@@ -36,18 +36,7 @@ class UsersController < ApplicationController
 
   def task_stats_header_data
     @user = User.find_by(email: params[:email])
-    sql = "SELECT is_completed, tag_id from tasks JOIN users ON users.id = tasks.user_id
-          JOIN tasks_tags ON tasks.id = tasks_tags.task_id WHERE user_id = #{@user.id} ORDER BY tag_id;"
-
-    results = ActiveRecord::Base.connection.exec_query(sql).rows
-    tag_success_data = {}
-    results.each do |result|
-      if tag_success_data.has_key?(result[1])
-        tag_success_data[result[1]] = tag_success_data[result[1]].push(result[0])
-      else
-        tag_success_data[result[1]] = [result[0]]
-      end
-    end
+    tag_success_data = get_tag_success_data(@user)
 
     max_average_percentage = 0
     min_average_percentage = 100
@@ -75,7 +64,51 @@ class UsersController < ApplicationController
     render json: @data
   end
 
+  def pie_charts_data
+    @user = User.find_by(email: params[:email])
+
+    render json: { favorite_tags: favorite_tags(@user), most_successfull_tags: most_successfull_tags(@user) }
+  end
+
   private
+
+  def favorite_tags(user)
+    processed_data = []
+    @data = user.tags.group('name').order('count_all desc').limit(10).count
+    @data.each do |key, value|
+      processed_data.push({ name: key, value: value })
+    end
+
+    processed_data
+  end
+
+  def most_successfull_tags(user)
+    tag_success_data = get_tag_success_data(user)
+    tag_success_percentage_data = []
+
+    tag_success_data.each do |tag_id, data_array|
+      percentage = data_array.sum * 100 / data_array.count
+      tag_success_percentage_data.push({ name: Tag.find(tag_id).name, value: percentage })
+    end
+
+    tag_success_percentage_data
+  end
+
+  def get_tag_success_data(user)
+    sql = "SELECT is_completed, tag_id from tasks JOIN users ON users.id = tasks.user_id
+          JOIN tasks_tags ON tasks.id = tasks_tags.task_id WHERE user_id = #{user.id} ORDER BY tag_id;"
+    results = ActiveRecord::Base.connection.exec_query(sql).rows
+    tag_success_data = {}
+    results.each do |result|
+      if tag_success_data.has_key?(result[1])
+        tag_success_data[result[1]] = tag_success_data[result[1]].push(result[0])
+      else
+        tag_success_data[result[1]] = [result[0]]
+      end
+    end
+
+    tag_success_data
+  end
 
   def user_params
     params.permit(:first_name, :last_name, :full_name, :email, :password, :password_confirmation, :dob, :user)
