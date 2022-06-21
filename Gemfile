@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.6.3'
+ruby '2.6.8'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 6.0.3', '>= 6.0.3.2'
@@ -43,3 +43,5 @@ gem 'bcrypt'
 gem 'rack-cors'
 gem 'jwt'
 gem 'pry', '~> 0.12.2'
+
+gem 'nokogiri', '~> 1.13', '>= 1.13.6'
